@@ -7,7 +7,7 @@ that aims to modernize the codebase for ES2018 with no concern over backwards
 compatibility.
 
 ```js 
-import {MikroNode} from './src/index';
+import {MikroNode} from 'mikronode';
 
 (async () => {
   try {
