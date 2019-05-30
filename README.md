@@ -1,39 +1,35 @@
 # Mikronode
-      
-Full-Featured asynchronous Mikrotik API interface for [NodeJS](http://nodejs.org).
+
+[MikroTik](https://mikrotik.com/) API client for [NodeJS](http://nodejs.org).
+
+This is a fork of the original [Mikronode](https://github.com/Trakkasure/mikronode)
+that aims to modernize the codebase for ES2018 with no concern over backwards
+compatibility.
 
 ```js 
-import {MikroNode} from ('mikronode');
+import {MikroNode} from './src/index';
 
-let device = new MikroNode('192.168.0.1');
-
-device.connect().then(([login]) => {
-  return login('username','password');
-}).then(conn => {
-  let chan = conn.openChannel("addresses"); // open a named channel
-  let chan2 = conn.openChannel("firewall_connections",true); // open a named channel, turn on "closeOnDone"
-
-  chan.write('/ip/address/print');
-
-  chan.on('done', data => {
-    // data is all of the sentences in an array.
-    data.forEach(function(item) {
-       console.log('Interface/IP: '+item.data.interface+"/"+item.data.address);
+(async () => {
+  try {
+    let device = new MikroNode('192.168.88.1');
+    let [login] = await device.connect();
+    let conn = await login('admin', 'password');
+    let chan = conn.openChannel('ip_example');
+    chan.write('/ip/address/print');
+    chan.on('done', result => {
+      chan.close();
+      conn.close();
+      if (result.data) {
+        let data = MikroNode.resultsToObj(result.data);
+        Object.values(data).forEach(item => {
+          console.log(`Interface: ${item.interface}\tIP:${item.address}`);
+        });
+      }
     });
-    chan.close(); // close the channel. It is not autoclosed by default.
-    conn.close(); // when closing connection, the socket is closed and program ends.
-  });
-
-  chan2.write('/ip/firewall/print');
-
-  chan2.done.subscribe(data => {
-    // data is all of the sentences in an array.
-    data.forEach(function(item) {
-      let data = MikroNode.resultsToObj(item.data); // convert array of field items to object.
-      console.log('Interface/IP: '+data.interface+"/"+data.address);
-    });
-  });
-});
+  } catch (e) {
+    console.error(e);
+  }
+})();
 ```
 
 ### Contributing

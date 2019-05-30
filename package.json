@@ -1,12 +1,12 @@
 {
   "name": "mikronode",
-  "description": "Mikrotik API implemented in Node",
+  "description": "MikroTik API client for NodeJS",
   "version": "3.0.0",
   "license": "MIT",
   "author": "Brandon Myers <trakkasure@gmail.com>",
   "scripts": {
-    "prebuild": "pegjs src/parser.g",
-    "lint": "eslint src/**.js"
+    "generate": "pegjs src/parser.g && eslint src/parser.js --fix",
+    "lint": "eslint src/**.js test/**.js examples/**.js"
   },
   "contributors": [
     {
@@ -23,8 +23,8 @@
     "socket",
     "api"
   ],
-  "repository": "git://github.com/tyler-sommer/mikronode",
-  "bugs": "https://github.com/tyler-sommer/mikronode/issues",
+  "repository": "git://github.com/violetatrium/mikronode",
+  "bugs": "https://github.com/violetatrium/mikronode/issues",
   "dependencies": {
     "esm": "^3.2.20"
   },

@@ -74,6 +74,13 @@ module.exports = {
       "rules": {
         "no-unused-expressions": "off"
       }
+    },
+    {
+      "files": ["src/parser.js"],
+      "rules": {
+        "no-unused-vars": "off",
+        "no-control-regex": "off"
+      }
     }
   ]
 };
