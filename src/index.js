@@ -236,7 +236,7 @@ class SocketStream {
       }
       return idx >= buff.length ? Buffer.alloc(0) : buff.slice(idx, buff.length);
     }, Buffer.from([]))
-      .subscribe(e => this.debug >= DEBUG.DEBUG && e.length && console.log('Buffer leftover: ', e), this.closeSocket, this.closeSocket);
+      .subscribe(e => this.debug >= DEBUG.DEBUG && e.length && console.log('Buffer leftover: ', e), this.closeSocket.bind(this), this.closeSocket.bind(this));
 
 
     this.socket.on('end', a => {
