@@ -35,3 +35,6 @@ device.connect().then(([login]) => {
   });
 });
 ```
+
+### Contributing
+Make sure to run `yarn prebuild` before committing if you've changed `src/parser.g` so that `/src/parser.js` reflects any changes.

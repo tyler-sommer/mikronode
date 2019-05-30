@@ -22,6 +22,7 @@ identifier
 value
   = v:[^\r\n\0]+ {return v.join('')}
   / v:[\r\n\0] {return ''}
+  / empty {return ''}
 
 end
   = f:fatal                                      {return {type: "fatal", data:f } }
@@ -56,3 +57,6 @@ null
 
 colon
   = [:]
+
+empty
+  = ''
