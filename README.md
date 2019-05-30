@@ -5,7 +5,7 @@ Full-Featured asynchronous Mikrotik API interface for [NodeJS](http://nodejs.org
 ```js 
 import {MikroNode} from ('mikronode');
 
-var device = new MikroNode('192.168.0.1');
+let device = new MikroNode('192.168.0.1');
 
 device.connect().then(([login]) => {
   return login('username','password');
@@ -29,7 +29,7 @@ device.connect().then(([login]) => {
   chan2.done.subscribe(data => {
     // data is all of the sentences in an array.
     data.forEach(function(item) {
-      var data = MikroNode.resultsToObj(item.data); // convert array of field items to object.
+      let data = MikroNode.resultsToObj(item.data); // convert array of field items to object.
       console.log('Interface/IP: '+data.interface+"/"+data.address);
     });
   });

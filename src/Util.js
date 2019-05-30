@@ -4,28 +4,28 @@ function encodeString(s, d) {
   let offset = 0;
 
   if(len < 0x80) {
-    data = new Buffer(len + 1);
+    data = new Buffer.alloc(len + 1);
     data[offset++] = len;
   } else if(len < 0x4000) {
-    data = new Buffer(len + 2);
+    data = new Buffer.alloc(len + 2);
     len |= 0x8000;
     data[offset++] = (len >> 8) & 0xff;
     data[offset++] = len & 0xff;
   } else if(len < 0x200000) {
-    data = new Buffer(len + 3);
+    data = new Buffer.alloc(len + 3);
     len |= 0xC00000;
     data[offset++] = (len >> 16) & 0xff;
     data[offset++] = (len >> 8) & 0xff;
     data[offset++] = len & 0xff;
   } else if(len < 0x10000000) {
-    data = new Buffer(len + 4);
+    data = new Buffer.alloc(len + 4);
     len |= 0xE0000000;
     data[offset++] = (len >> 24) & 0xff;
     data[offset++] = (len >> 16) & 0xff;
     data[offset++] = (len >> 8) & 0xff;
     data[offset++] = len & 0xff;
   } else {
-    data = new Buffer(len + 5);
+    data = new Buffer.alloc(len + 5);
     data[offset++] = 0xF0;
     data[offset++] = (len >> 24) & 0xff;
     data[offset++] = (len >> 16) & 0xff;

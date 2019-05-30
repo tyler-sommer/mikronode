@@ -183,7 +183,7 @@ export default class Channel extends events.EventEmitter {
       const cmd = this.registerCommand(command, args, resolve, reject);
       const commandId = cmd.id;
 
-      if((Object.keys(this.cmd).length - 1) == 0 && !(this._sync && this.status & CHANNEL.RUNNING)) {
+      if((Object.keys(this.cmd).length - 1) === 0 && !(this._sync && this.status & CHANNEL.RUNNING)) {
         // console.log("There are no commands in the buffer, but channel is in running state while sync enabled.");
         this._status = CHANNEL.RUNNING;
         this.debug >= DEBUG.INFO && console.log('Writing on channel %s', this.id, command, args);
@@ -261,7 +261,7 @@ export default class Channel extends events.EventEmitter {
     this.cmd[commandId] = {id: commandId, cmd: {id: commandId, command, args}, resolve, reject};
     (function (id, resolve, reject) {
       const race = Observable.race(
-        this.done
+        this._done
           .filter(
             data => data.cmd && data.cmd.id === id
           )
@@ -269,7 +269,7 @@ export default class Channel extends events.EventEmitter {
           //     d=>console.log("*** Done in %s:%s",d.cmd.id,id)
           // )
           .take(1)
-        , this.trap
+        , this._trap
           .filter(
             data => data.cmd && data.cmd.id === id
           )
