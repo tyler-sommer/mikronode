@@ -6,9 +6,9 @@ var device = new MikroNode('10.10.10.10');
 
 // Connect to MikroTik device
 device.connect(/* socketOpts */).then(([login])=>login('username','password')).then(
-	function(conn) { 
+	function(conn) {
 		// When all channels are marked done, close the connection.
-		conn.closeOnDone(true);
+		conn._closeOnDone(true);
 
 		var channel1=conn.openChannel();
 		var channel2=conn.openChannel();

@@ -1,17 +1,15 @@
 // this tests that the connection is properly closed.
 // This only verifies that all channels have been eliminated.
-// A more full-featured test is in the works. 
+// A more full-featured test is in the works.
 
-var api=require('../dist/mikronode.js')
+import {MikroNode} from '../src/index';
 
-var device=new api('10.10.10.10');
-// device.setDebug(api.DEBUG);
+let device=new MikroNode('192.168.88.1');
+device.setDebug(MikroNode.SILLY);
 
-device.connect(
-    function(err,login) {
-        login('admin','password',runProgram);
-    }
-);
+device.connect().then(([login]) => {
+    return login('admin','password').then(c => runProgram(null, c));
+});
 
 function runProgram(err,c) {
 
@@ -22,7 +20,7 @@ function runProgram(err,c) {
     const channel3 = c.openChannel(3);
 
     c.on('close',function(c2) {
-        var id=channel1.getId();
+        let id=channel1.getId();
         console.log("Channel closing...")
         try {
             c2.getChannel(id);
@@ -47,4 +45,4 @@ function runProgram(err,c) {
     });
     channel1.write('/quit').catch(e=>{console.log("Error writing quit",e)})
 }
-        
+

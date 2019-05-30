@@ -4,7 +4,7 @@ var device = new MikroNode('10.10.10.10');
 // device.setDebug(MikroNode.DEBUG);
 device.connect().then(([login])=>login('admin','password')).then(function(conn) {
     console.log("Logged in.");
-    conn.closeOnDone(true); // All channels need to complete before the connection will close.
+    conn._closeOnDone(true); // All channels need to complete before the connection will close.
     var listenChannel=conn.openChannel("listen");
 
     // Each sentence that comes from the device goes through the data stream.

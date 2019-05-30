@@ -1,12 +1,12 @@
 
-var api=require('../dist/mikronode.js');
+let api=require('../dist/mikronode.js');
 
-var device=new api(/* Host */'127.0.0.1' /*, Port */ /*, Timeout */);
+let device=new api(/* Host */'127.0.0.1' /*, Port */ /*, Timeout */);
 // device.setDebug(api.DEBUG);
 
 // connect:
 device.connect().then(([login])=>login('usrename','password')).then(function(conn) {
-    var c1=conn.openChannel();
+    let c1=conn.openChannel();
     console.log('Getting Packages');
     c1.write('/system/package/getall');
     c1.data // get only data here

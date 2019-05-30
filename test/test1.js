@@ -1,17 +1,18 @@
-var MikroNode = require('../dist/mikronode.js');
-var device = new MikroNode('10.10.10.10');
-// device.setDebug(MikroNode.DEBUG);
+import {MikroNode} from '../src/index';
+
+let device = new MikroNode('192.168.88.1');
+device.setDebug(MikroNode.SILLY);
 // By setting TLS options, TLS connection is enabled.
 
-device.connect(/* socketOpts */).then(function([login,socketInfo,...args]){
+device.connect(/* socketOpts */).then(function([login,socketInfo]){
 	// The ability to login or not depending on resolting socket info.
 	console.log("Connected: ",socketInfo);
 	return login('admin','password'); // must return result of login();
-}).then(conn=>{ 
+}).then(conn => {
 	try {
 		console.log("Connected");
 		conn.closeOnDone(true);
-		var channel=conn.openChannel("address_export");
+		let channel=conn.openChannel("address_export");
 		channel.closeOnDone(true);
 
 		console.log("Writing command...");

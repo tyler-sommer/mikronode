@@ -9,7 +9,7 @@ device.connect().then(([login])=>login('admin','password')).then(conn=>{
 		// When all channels are marked done, close the connection.
 	    console.log('connected');
 
-		conn.closeOnDone(true);
+		conn._closeOnDone(true);
 
 		var channel1=conn.openChannel();
 		channel1.closeOnDone(true);

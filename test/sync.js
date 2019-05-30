@@ -1,14 +1,14 @@
-var MikroNode = require('../dist/mikronode.js');
-var device = new MikroNode('10.10.10.10');
+let MikroNode = require('../dist/mikronode.js');
+let device = new MikroNode('10.10.10.10');
 // device.setDebug(MikroNode.DEBUG);
 
 device.connect().then(([login])=>login('admin', 'password').then(function (conn) {
     console.log("Connected");
     // When all channels are complete close the connection.
-    conn.closeOnDone(true); 
+    conn._closeOnDone(true);
 
     // Open new channel named "1" with auto close on.
-    let chan = conn.openChannel('1',true)
+    let chan = conn.openChannel('1',true);
 
     // Force sync command mode.
     chan.sync(true);
@@ -76,4 +76,4 @@ device.connect().then(([login])=>login('admin', 'password').then(function (conn)
         // When we are all closed.
         console.log("Closed done: ");
     });
-});
+}));
