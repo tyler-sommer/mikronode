@@ -33,4 +33,4 @@ import {MikroNode} from './src/index';
 ```
 
 ### Contributing
-Make sure to run `yarn prebuild` before committing if you've changed `src/parser.g` so that `/src/parser.js` reflects any changes.
+Make sure to run `yarn generate` before committing if you've changed `src/parser.g` so that `/src/parser.js` reflects any changes.
