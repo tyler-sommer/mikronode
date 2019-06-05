@@ -241,7 +241,7 @@ class SocketStream {
 
     this.socket.on('end', a => {
       this.debug >= DEBUG.INFO && console.log('Connection end ' + a);
-      if(this.status == CONNECTION.CONNECTED) {
+      if(this.status === CONNECTION.CONNECTED) {
         // Completing the sentence closes all downstream observables and completes any subscriptions.
         this.sentence$.complete();
         // this.handler.close(true);
