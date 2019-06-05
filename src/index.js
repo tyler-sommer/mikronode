@@ -186,28 +186,13 @@ class SocketStream {
 
     this.sentence$ = new Subject();
     // Each raw sentence from the stream passes through this parser.
-    let holdBuffer = [];
     this.parsed$ = this.sentence$
       .do(d => this.debug >= DEBUG.SILLY && console.log('Data to parse:', JSON.stringify(d)))
       .map(o => o.map(x => x.split('\r').join('\\r').split('\n').join('\\n')).join('\n')) // Make array string.
       .map(d => {
-        if(holdBuffer.length) {
-          console.log('Hold buffer:', holdBuffer);
-          holdBuffer = [];
-        }
         let s = parser.parse(d);
         s.host = this.host;
         return s;
-      })
-      .catch(e => {
-        holdBuffer = [];
-        console.error('***************************************************************************');
-        console.error('***************************************************************************');
-        console.error('Error processing sentence:', e);
-        console.error('Skipping and continuing');
-        console.error('***************************************************************************');
-        console.error('***************************************************************************');
-        return this.parsed$;
       })
       .filter(e => !!e)
       .flatMap(d => {
