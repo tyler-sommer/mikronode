@@ -5,7 +5,7 @@ import crypto from 'crypto';
 import dns from 'dns';
 
 import {decodePacket, encodeString, objToAPIParams, resultsToObj} from './Util.js';
-import {CHANNEL, CONNECTION, DEBUG, EVENT, STRING_TYPE} from './constants.js';
+import {CHANNEL, CONNECTION, DEBUG, EVENT, STRING_TYPE, AUTH_MODE} from './constants.js';
 import parser from './parser.js';
 
 import Connection from './Connection';
@@ -48,6 +48,7 @@ export class MikroNode {
     this.sock = null;
 
     this.status = CONNECTION.DISCONNECTED;
+    this.authMode = AUTH_MODE.DEFAULT;
 
     this.tls = null;
 
@@ -115,11 +116,18 @@ export class MikroNode {
     const login = (user, password) => {
       return new Promise((resolve, reject) => {
         this.debug >= DEBUG.DEBUG && console.log('Logging in');
-        stream.write('/login');
+        if(this.authMode === AUTH_MODE.PRE_6_43) {
+          // Support pre-6.43 authentication
+          // see: https://wiki.mikrotik.com/wiki/Manual:API#Initial_login
+          stream.write(['/login']);
+        } else {
+          stream.write(['/login', `=name=${user}`, `=password=${password}`]);
+        }
         // Create a connection handler
         this.connection = new Connection(
           {...stream, close},
           challenge => {
+            // handler for supporting challenge during pre-6.43 authentication
             const md5 = crypto.createHash('md5');
             md5.update(Buffer.concat([Buffer.from(nullString + password), Buffer.from(challenge)]));
             stream.write([
@@ -169,7 +177,7 @@ export class MikroNode {
 
 // Object.keys(DEBUG).forEach(k=>MikroNode[k]=DEBUG[k]);
 const api = Object.assign(MikroNode, DEBUG);
-export default Object.assign(api, {CONNECTION, CHANNEL, EVENT, resultsToObj});
+export default Object.assign(api, {CONNECTION, CHANNEL, EVENT, AUTH_MODE, resultsToObj});
 
 /** Handles the socket connection and parsing of infcoming data. */
 

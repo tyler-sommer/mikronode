@@ -29,6 +29,12 @@ const CONNECTION = {
   , ERROR: 32
 };
 
+const AUTH_MODE = {
+  PRE_6_43: 'pre-6.43',
+  POST_6_43: 'default',
+  DEFAULT: 'default',
+};
+
 const CHANNEL = {
   NONE: 0
   , OPEN: 1
@@ -51,4 +57,4 @@ const EVENT = {
   , DATA: 'data'  // This is an artifical event, not one from the API
 };
 
-export {STRING_TYPE, DEBUG, CONNECTION, CHANNEL, EVENT, connectionLabels};
+export {STRING_TYPE, DEBUG, CONNECTION, CHANNEL, EVENT, AUTH_MODE, connectionLabels};
