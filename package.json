@@ -5,7 +5,7 @@
   "license": "MIT",
   "author": "Brandon Myers <trakkasure@gmail.com>",
   "scripts": {
-    "generate": "pegjs src/parser.g && eslint src/parser.js --fix",
+    "generate": "./node_modules/pegjs/bin/pegjs src/parser.g && eslint src/parser.js --fix",
     "lint": "eslint src/**.js test/**.js examples/**.js"
   },
   "contributors": [
@@ -32,6 +32,7 @@
     "chai": "^3.5.0",
     "eslint": "^5.15.3",
     "mocha": ">=1.7.4",
+    "pegjs": "^0.10.0",
     "rxjs": "^5.3.0"
   },
   "peerDependencies": {
