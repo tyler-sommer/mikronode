@@ -47,10 +47,10 @@ fatal
 /* Tokens */
 
 s
-  = [ \t\r\n\f\0x00]* {return ""}
+  = [ \t\r\n\f\x0C\0x00]* {return ""}
 
 ns
-  = [^ \t\r\n\f\0x00]+
+  = [^ \t\r\n\f\x0C\0x00]+
 
 null
   = [\0x00]
