@@ -217,8 +217,8 @@ class SocketStream {
     // My poor stream parser
     this.data$.scan((/* @type Buffer */ last,/* @type Buffer */stream, i) => {
       let buff = Buffer.concat([last, stream]), end = 0, idx = 0, packet;
-      this.debug >= DEBUG.DEBUG && console.log('Packet received: ', stream.toString().split('\u0000'));
-      this.debug >= DEBUG.DEBUG && last.length > 0 && console.log('Starting parse loop w/existing packet ', last.toString());
+      this.debug >= DEBUG.DEBUG && console.log('Packet received: ', Buffer.from(stream).toString('base64'));
+      this.debug >= DEBUG.DEBUG && last.length > 0 && console.log('Starting parse loop w/existing packet ', Buffer.from(last).toString('base64'));
 
       while(idx < buff.length && (end = buff.indexOf('\u0000', idx, 'utf8')) !== -1) {
         this.debug >= DEBUG.SILLY && console.log('Decoding: ', idx, end, buff.length, buff.slice(idx, end));
@@ -229,7 +229,7 @@ class SocketStream {
       }
       return idx >= buff.length ? Buffer.alloc(0) : buff.slice(idx, buff.length);
     }, Buffer.from([]))
-      .subscribe(e => this.debug >= DEBUG.DEBUG && e.length && console.log('Buffer leftover: ', e), this.closeSocket.bind(this), this.closeSocket.bind(this));
+      .subscribe(e => this.debug >= DEBUG.DEBUG && e.length && console.log('Buffer leftover: ', Buffer.from(e).toString('base64')), this.closeSocket.bind(this), this.closeSocket.bind(this));
 
 
     this.socket.on('end', a => {
