@@ -56,33 +56,24 @@ loop:
         break;
       case (b & 0xC0) === 0x80:
         len &= ~0xC0;
-        len <<= 8;
-        len += data[idx++];
+        len = (len << 8) | data[idx++];
         break;
       case (b & 0xE0) === 0xC0:
         len &= (~0xE0);
-        len <<= 8;
-        len += data[idx++];
-        len <<= 8;
-        len += data[idx++];
+        len = (len << 8) | data[idx++];
+        len = (len << 8) | data[idx++];
         break;
       case (b & 0xF0) === 0xE0:
         len &= (~0xF0);
-        len <<= 8;
-        len += data[idx++];
-        len <<= 8;
-        len += data[idx++];
-        len <<= 8;
-        len += data[idx++];
+        len = (len << 8) | data[idx++];
+        len = (len << 8) | data[idx++];
+        len = (len << 8) | data[idx++];
         break;
       case (b & 0xF8) === 0xF0:
         len = data[idx++];
-        len <<= 8;
-        len += data[idx++];
-        len <<= 8;
-        len += data[idx++];
-        len <<= 8;
-        len += data[idx++];
+        len = (len << 8) | data[idx++];
+        len = (len << 8) | data[idx++];
+        len = (len << 8) | data[idx++];
         break;
     }
     let end = idx + len;
