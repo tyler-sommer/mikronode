@@ -93,6 +93,8 @@ function decodeLength(data, idx, b) {
       len = (len << 8) | data[idx++];
       len = (len << 8) | data[idx++];
       break;
+    default:
+      throw new Error(`unable to decode length (${b.toString('hex')})`);
   }
   return [len, idx];
 }

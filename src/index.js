@@ -219,11 +219,16 @@ class SocketStream {
       let buff = Buffer.concat([last, stream]), end = 0, idx = 0, packet;
       this.debug >= DEBUG.DEBUG && console.log('Packet received: ', Buffer.from(stream).toString('base64'));
       this.debug >= DEBUG.DEBUG && last.length > 0 && console.log('Starting parse loop w/existing packet ', Buffer.from(last).toString('base64'));
-      let [packets, leftover] = decodePackets(buff);
-      for(packet of packets) {
-        this.sentence$.next(packet);
+      try {
+        let [packets, leftover] = decodePackets(buff);
+        for(packet of packets) {
+          this.sentence$.next(packet);
+        }
+        return leftover;
+      } catch(e) {
+        e.message = `${e.message} - original buffer: ${buff.toString('base64')}`;
+        this.sentence$.error(e);
       }
-      return leftover;
     }, Buffer.from([]))
       .subscribe(e => this.debug >= DEBUG.DEBUG && e.length && console.log('Buffer leftover: ', Buffer.from(e).toString('base64')), this.closeSocket.bind(this), this.closeSocket.bind(this));
 
