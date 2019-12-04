@@ -4,7 +4,7 @@ import {Observable, Subject} from 'rxjs';
 import crypto from 'crypto';
 import dns from 'dns';
 
-import {decodePacket, encodeString, objToAPIParams, resultsToObj} from './Util.js';
+import {decodePackets, encodeString, objToAPIParams, resultsToObj} from './Util.js';
 import {CHANNEL, CONNECTION, DEBUG, EVENT, STRING_TYPE, AUTH_MODE} from './constants.js';
 import parser from './parser.js';
 
@@ -219,15 +219,11 @@ class SocketStream {
       let buff = Buffer.concat([last, stream]), end = 0, idx = 0, packet;
       this.debug >= DEBUG.DEBUG && console.log('Packet received: ', Buffer.from(stream).toString('base64'));
       this.debug >= DEBUG.DEBUG && last.length > 0 && console.log('Starting parse loop w/existing packet ', Buffer.from(last).toString('base64'));
-
-      while(idx < buff.length && (end = buff.indexOf('\u0000', idx, 'utf8')) !== -1) {
-        this.debug >= DEBUG.SILLY && console.log('Decoding: ', idx, end, buff.length, buff.slice(idx, end));
-        packet = decodePacket(buff.slice(idx, end));
-        idx = end + 1;
-        this.debug >= DEBUG.SILLY && console.log('Detected end of sentence, posting existing sentence', packet);
+      let [packets, leftover] = decodePackets(buff);
+      for(packet of packets) {
         this.sentence$.next(packet);
       }
-      return idx >= buff.length ? Buffer.alloc(0) : buff.slice(idx, buff.length);
+      return leftover;
     }, Buffer.from([]))
       .subscribe(e => this.debug >= DEBUG.DEBUG && e.length && console.log('Buffer leftover: ', Buffer.from(e).toString('base64')), this.closeSocket.bind(this), this.closeSocket.bind(this));
 

@@ -37,40 +37,65 @@ function encodeString(s, d) {
   return data;
 }
 
-function decodePacket(data) {
-  if(!data.length) return [];
+function decodePackets(data) {
+  if (!data.length) return [];
   const buf = [];
+  let leftover;
   let idx = 0;
-  while(idx < data.length) {
-    let len;
+  let bbuf = [];
+loop:
+  while (idx < data.length) {
     let b = data[idx++];
-    switch(true) {
-      case (b & 192) === 128:
-        len = ((b & 63) << 8) + data[idx++];
+    let len = b;
+    switch (true) {
+      case b === 0x00:
+        buf.push(bbuf);
+        bbuf = [];
+        continue loop;
+      case (b & 0x80) === 0x00:
         break;
-      case (b & 224) === 192:
-        len = ((b & 31) << 8) + data[idx++];
-        len = (len << 8) + data[idx++];
+      case (b & 0xC0) === 0x80:
+        len &= ~0xC0;
+        len <<= 8;
+        len += data[idx++];
         break;
-      case (b & 240) === 224:
-        len = ((b & 15) << 8) + data[idx++];
-        len = (len << 8) + data[idx++];
-        len = (len << 8) + data[idx++];
+      case (b & 0xE0) === 0xC0:
+        len &= (~0xE0);
+        len <<= 8;
+        len += data[idx++];
+        len <<= 8;
+        len += data[idx++];
         break;
-      case (b & 128) !== 0:
+      case (b & 0xF0) === 0xE0:
+        len &= (~0xF0);
+        len <<= 8;
+        len += data[idx++];
+        len <<= 8;
+        len += data[idx++];
+        len <<= 8;
+        len += data[idx++];
+        break;
+      case (b & 0xF8) === 0xF0:
         len = data[idx++];
-        len = (len << 8) + data[idx++];
-        len = (len << 8) + data[idx++];
-        len = (len << 8) + data[idx++];
+        len <<= 8;
+        len += data[idx++];
+        len <<= 8;
+        len += data[idx++];
+        len <<= 8;
+        len += data[idx++];
         break;
-      default:
-        len = b;
     }
-    // console.log("Pushing ",idx,len,data.slice(idx,idx+len));
-    buf.push(data.slice(idx, idx + len).toString('utf8'));
+    let end = idx + len;
+    if(end > data.length) {
+      // record is incomplete, set leftover and quit the loop
+      leftover = data.slice(idx, end);
+      idx += len;
+      break;
+    }
+    bbuf.push(data.slice(idx, end).toString('utf8'));
     idx += len;
   }
-  return buf;
+  return [buf, leftover];
 }
 
 function objToAPIParams(obj, type) {
@@ -92,4 +117,4 @@ function resultsToObj(r) {
   }, {});
 }
 
-export {decodePacket, encodeString, objToAPIParams, resultsToObj};
+export {decodePackets, encodeString, objToAPIParams, resultsToObj};
