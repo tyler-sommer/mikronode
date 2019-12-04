@@ -40,7 +40,6 @@ function encodeString(s, d) {
 function decodePackets(data) {
   if (!data.length) return [];
   const result = [];
-  let leftover;
   let idx = 0;
   let buf = [];
   // orig contains the original, encoded bytes of the record being decoded.
@@ -64,14 +63,13 @@ function decodePackets(data) {
     let end = idx + len;
     orig = Buffer.concat([orig, data.slice(rec_start, end)]);
     if(end > data.length) {
-      // record is incomplete, set leftover and quit the loop
-      leftover = orig;
+      // record is incomplete, quit the loop.
       break;
     }
     buf.push(data.slice(idx, end).toString('utf8'));
     idx += len;
   }
-  return [result, leftover];
+  return [result, orig];
 }
 
 function decodeLength(data, idx, b) {
