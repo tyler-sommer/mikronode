@@ -43,7 +43,13 @@ function decodePackets(data) {
   let leftover;
   let idx = 0;
   let buf = [];
+  // orig contains the original, encoded bytes of the record being decoded.
+  // when a record is decoded and it is realized the record is incomplete,
+  // the encoded orig will be returned as leftover to be decoded again when
+  // more data is received in the next packet.
+  let orig = Buffer.alloc(0);
   while (idx < data.length) {
+    let rec_start = idx;
     let b = data[idx++];
     let len;
     if(b === 0x00) {
@@ -51,14 +57,15 @@ function decodePackets(data) {
       result.push(buf);
       // and clear the buffer for the next record
       buf = [];
+      orig = Buffer.alloc(0);
       continue;
     }
     [len, idx] = decodeLength(data, idx, b);
     let end = idx + len;
+    orig = Buffer.concat([orig, data.slice(rec_start, end)]);
     if(end > data.length) {
       // record is incomplete, set leftover and quit the loop
-      leftover = data.slice(idx, end);
-      idx += len;
+      leftover = orig;
       break;
     }
     buf.push(data.slice(idx, end).toString('utf8'));
