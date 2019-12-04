@@ -37,40 +37,66 @@ function encodeString(s, d) {
   return data;
 }
 
-function decodePacket(data) {
-  if(!data.length) return [];
-  const buf = [];
+function decodePackets(data) {
+  if (!data.length) return [];
+  const result = [];
+  let leftover;
   let idx = 0;
-  while(idx < data.length) {
-    let len;
+  let buf = [];
+  while (idx < data.length) {
     let b = data[idx++];
-    switch(true) {
-      case (b & 192) === 128:
-        len = ((b & 63) << 8) + data[idx++];
-        break;
-      case (b & 224) === 192:
-        len = ((b & 31) << 8) + data[idx++];
-        len = (len << 8) + data[idx++];
-        break;
-      case (b & 240) === 224:
-        len = ((b & 15) << 8) + data[idx++];
-        len = (len << 8) + data[idx++];
-        len = (len << 8) + data[idx++];
-        break;
-      case (b & 128) !== 0:
-        len = data[idx++];
-        len = (len << 8) + data[idx++];
-        len = (len << 8) + data[idx++];
-        len = (len << 8) + data[idx++];
-        break;
-      default:
-        len = b;
+    let len;
+    if(b === 0x00) {
+      // end of record, push what we have currently onto the result
+      result.push(buf);
+      // and clear the buffer for the next record
+      buf = [];
+      continue;
     }
-    // console.log("Pushing ",idx,len,data.slice(idx,idx+len));
-    buf.push(data.slice(idx, idx + len).toString('utf8'));
+    [len, idx] = decodeLength(data, idx, b);
+    let end = idx + len;
+    if(end > data.length) {
+      // record is incomplete, set leftover and quit the loop
+      leftover = data.slice(idx, end);
+      idx += len;
+      break;
+    }
+    buf.push(data.slice(idx, end).toString('utf8'));
     idx += len;
   }
-  return buf;
+  return [result, leftover];
+}
+
+function decodeLength(data, idx, b) {
+  let len = b;
+  switch (true) {
+    case (b & 0x80) === 0x00:
+      break;
+    case (b & 0xC0) === 0x80:
+      len &= ~0xC0;
+      len = (len << 8) | data[idx++];
+      break;
+    case (b & 0xE0) === 0xC0:
+      len &= (~0xE0);
+      len = (len << 8) | data[idx++];
+      len = (len << 8) | data[idx++];
+      break;
+    case (b & 0xF0) === 0xE0:
+      len &= (~0xF0);
+      len = (len << 8) | data[idx++];
+      len = (len << 8) | data[idx++];
+      len = (len << 8) | data[idx++];
+      break;
+    case (b & 0xF8) === 0xF0:
+      len = data[idx++];
+      len = (len << 8) | data[idx++];
+      len = (len << 8) | data[idx++];
+      len = (len << 8) | data[idx++];
+      break;
+    default:
+      throw new Error(`unable to decode length (${b.toString('hex')})`);
+  }
+  return [len, idx];
 }
 
 function objToAPIParams(obj, type) {
@@ -92,4 +118,4 @@ function resultsToObj(r) {
   }, {});
 }
 
-export {decodePacket, encodeString, objToAPIParams, resultsToObj};
+export {decodePackets, encodeString, objToAPIParams, resultsToObj};
