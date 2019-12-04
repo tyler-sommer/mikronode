@@ -39,43 +39,21 @@ function encodeString(s, d) {
 
 function decodePackets(data) {
   if (!data.length) return [];
-  const buf = [];
+  const result = [];
   let leftover;
   let idx = 0;
-  let bbuf = [];
-loop:
+  let buf = [];
   while (idx < data.length) {
     let b = data[idx++];
-    let len = b;
-    switch (true) {
-      case b === 0x00:
-        buf.push(bbuf);
-        bbuf = [];
-        continue loop;
-      case (b & 0x80) === 0x00:
-        break;
-      case (b & 0xC0) === 0x80:
-        len &= ~0xC0;
-        len = (len << 8) | data[idx++];
-        break;
-      case (b & 0xE0) === 0xC0:
-        len &= (~0xE0);
-        len = (len << 8) | data[idx++];
-        len = (len << 8) | data[idx++];
-        break;
-      case (b & 0xF0) === 0xE0:
-        len &= (~0xF0);
-        len = (len << 8) | data[idx++];
-        len = (len << 8) | data[idx++];
-        len = (len << 8) | data[idx++];
-        break;
-      case (b & 0xF8) === 0xF0:
-        len = data[idx++];
-        len = (len << 8) | data[idx++];
-        len = (len << 8) | data[idx++];
-        len = (len << 8) | data[idx++];
-        break;
+    let len;
+    if(b === 0x00) {
+      // end of record, push what we have currently onto the result
+      result.push(buf);
+      // and clear the buffer for the next record
+      buf = [];
+      continue;
     }
+    [len, idx] = decodeLength(data, idx, b);
     let end = idx + len;
     if(end > data.length) {
       // record is incomplete, set leftover and quit the loop
@@ -83,10 +61,40 @@ loop:
       idx += len;
       break;
     }
-    bbuf.push(data.slice(idx, end).toString('utf8'));
+    buf.push(data.slice(idx, end).toString('utf8'));
     idx += len;
   }
-  return [buf, leftover];
+  return [result, leftover];
+}
+
+function decodeLength(data, idx, b) {
+  let len = b;
+  switch (true) {
+    case (b & 0x80) === 0x00:
+      break;
+    case (b & 0xC0) === 0x80:
+      len &= ~0xC0;
+      len = (len << 8) | data[idx++];
+      break;
+    case (b & 0xE0) === 0xC0:
+      len &= (~0xE0);
+      len = (len << 8) | data[idx++];
+      len = (len << 8) | data[idx++];
+      break;
+    case (b & 0xF0) === 0xE0:
+      len &= (~0xF0);
+      len = (len << 8) | data[idx++];
+      len = (len << 8) | data[idx++];
+      len = (len << 8) | data[idx++];
+      break;
+    case (b & 0xF8) === 0xF0:
+      len = data[idx++];
+      len = (len << 8) | data[idx++];
+      len = (len << 8) | data[idx++];
+      len = (len << 8) | data[idx++];
+      break;
+  }
+  return [len, idx];
 }
 
 function objToAPIParams(obj, type) {
