@@ -63,7 +63,7 @@ function decodePackets(data) {
     }
     [len, idx] = decodeLength(data, idx, b);
     let end = idx + len;
-    if(end > data.length) {
+    if(end >= data.length) {
       // record is incomplete, set leftover and quit the loop.
       leftover = data.slice(rec_start, data.length);
       break;
