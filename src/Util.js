@@ -38,38 +38,40 @@ function encodeString(s, d) {
 }
 
 function decodePackets(data) {
-  if (!data.length) return [];
+  if(!data.length) {
+    return [];
+  }
   const result = [];
   let idx = 0;
   let buf = [];
-  // orig contains the original, encoded bytes of the record being decoded.
+  // rec_start is the index where the current record being decoded starts.
   // when a record is decoded and it is realized the record is incomplete,
-  // the encoded orig will be returned as leftover to be decoded again when
-  // more data is received in the next packet.
-  let orig = Buffer.alloc(0);
-  while (idx < data.length) {
-    let rec_start = idx;
+  // the encoded original will be returned as leftover to be decoded again
+  // when more data is received in the next packet.
+  let rec_start = 0;
+  let leftover;
+  while(idx < data.length) {
     let b = data[idx++];
     let len;
     if(b === 0x00) {
       // end of record, push what we have currently onto the result
       result.push(buf);
-      // and clear the buffer for the next record
+      // and prepare for the next record
       buf = [];
-      orig = Buffer.alloc(0);
+      rec_start = idx;
       continue;
     }
     [len, idx] = decodeLength(data, idx, b);
     let end = idx + len;
-    orig = Buffer.concat([orig, data.slice(rec_start, end)]);
     if(end > data.length) {
-      // record is incomplete, quit the loop.
+      // record is incomplete, set leftover and quit the loop.
+      leftover = data.slice(rec_start, data.length);
       break;
     }
     buf.push(data.slice(idx, end).toString('utf8'));
     idx += len;
   }
-  return [result, orig];
+  return [result, leftover];
 }
 
 function decodeLength(data, idx, b) {
@@ -82,12 +84,12 @@ function decodeLength(data, idx, b) {
       len = (len << 8) | data[idx++];
       break;
     case (b & 0xE0) === 0xC0:
-      len &= (~0xE0);
+      len &= ~0xE0;
       len = (len << 8) | data[idx++];
       len = (len << 8) | data[idx++];
       break;
     case (b & 0xF0) === 0xE0:
-      len &= (~0xF0);
+      len &= ~0xF0;
       len = (len << 8) | data[idx++];
       len = (len << 8) | data[idx++];
       len = (len << 8) | data[idx++];
